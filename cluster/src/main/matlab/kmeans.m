@@ -88,7 +88,6 @@ function [idx, varargout] = kmeans(K, data, varargin)
         for n = 1:N
             a = zeros(1, p.Results.K);
             for k = 1:p.Results.K
-%                 a(k)=sum(abs(p.Results.data(:,n) - u(:,k)))^2;
                 a(k) = sum( (p.Results.data(:, n) - u(:, k)).^2 );
             end
             [b, i] = min(a);
