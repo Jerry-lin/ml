@@ -88,6 +88,7 @@ function [idx, varargout] = kmeans(K, data, varargin)
         for n = 1:N
             a = zeros(1, p.Results.K);
             for k = 1:p.Results.K
+            %  SSE weight factor 
                 a(k) = sum( (p.Results.data(:, n) - u(:, k)).^2 );
             end
             [b, i] = min(a);
@@ -103,10 +104,11 @@ function [idx, varargout] = kmeans(K, data, varargin)
     end
 
     function j = calc_J(r, u)
-%         calculate the value of distortion function J
+%         calculate the value of distortion function J, which is used as termination condition
         j = 0;
         for n = 1:N
             for k = 1:p.Results.K
+%                 SSE weight factor
                 j = j + sum( r(k, n)' * (p.Results.data(:, n) - u(:, k)).^2 );
             end
         end
