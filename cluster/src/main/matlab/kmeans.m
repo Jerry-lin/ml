@@ -1,7 +1,7 @@
 function [idx, varargout] = kmeans(K, data, varargin)
 % k-means implementation
 % function(K, data)
-% function(..., 'observer', fun_handle, 'threshold', threshold, 'maxiter', maxiter)
+% function(..., 'observer', fun_handle, 'weight', fun_handle_weight, 'threshold', threshold, 'maxiter', maxiter)
 % observer:
 %  - function handle: @(data, iters, Z, C)
 %           - iter: iteration count
@@ -19,6 +19,7 @@ function [idx, varargout] = kmeans(K, data, varargin)
     default_handle = @NOP;
     defualt_threshold = 1e-15;
     defualt_maxiter = 100;
+    defualt_centers = [];
    
 %     parse input parameters 
     p = inputParser;
@@ -27,13 +28,14 @@ function [idx, varargout] = kmeans(K, data, varargin)
     addParameter(p,'observer', default_handle);
     addParameter(p,'threshold', defualt_threshold, @isnumeric);
     addParameter(p,'maxiter', defualt_maxiter, @isnumeric);
+    addParameter(p,'centers', defualt_centers);
     parse(p, K, data, varargin{:});
    
     assert(p.Results.K > 0)
    
 %     size of the dataset
     [M, N] = size(p.Results.data);
-    assert(p.Results.K < M * N);
+    assert(p.Results.K < N);
     assert(p.Results.threshold > 0);
    
    
@@ -76,10 +78,14 @@ function [idx, varargout] = kmeans(K, data, varargin)
 %     embedded functions
    
     function c = initCenters()
-       c = zeros(M, p.Results.K);
-       for k = 1:p.Results.K
-           c(:, k) = p.Results.data(:, unidrnd(N)); 
-       end
+        if isempty(p.Results.centers)
+            c = zeros(M, p.Results.K);
+            for k = 1:p.Results.K
+                c(:, k) = p.Results.data(:, unidrnd(N)); 
+            end
+        else
+            c = p.Results.centers;
+        end
     end
 
     function z = assignToCenter(u)
@@ -88,7 +94,6 @@ function [idx, varargout] = kmeans(K, data, varargin)
         for n = 1:N
             a = zeros(1, p.Results.K);
             for k = 1:p.Results.K
-            %  SSE weight factor 
                 a(k) = sum( (p.Results.data(:, n) - u(:, k)).^2 );
             end
             [b, i] = min(a);
@@ -104,11 +109,10 @@ function [idx, varargout] = kmeans(K, data, varargin)
     end
 
     function j = calc_J(r, u)
-%         calculate the value of distortion function J, which is used as termination condition
+%         calculate the value of distortion function J
         j = 0;
         for n = 1:N
             for k = 1:p.Results.K
-%                 SSE weight factor
                 j = j + sum( r(k, n)' * (p.Results.data(:, n) - u(:, k)).^2 );
             end
         end
