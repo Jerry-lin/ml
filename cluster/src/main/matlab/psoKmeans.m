@@ -73,7 +73,7 @@ function [idx, varargout] = psoKmeans(K, D, varargin)
  
     % k-means algorithm   --------------------------------
     [idx, C] = kmeans(p.Results.K, p.Results.D, 'maxiter', p.Results.maxiter,...
-        'centers', G_best_x, 'observer', @observer_test);
+        'centers', G_best_x, 'observer', @observer_test_kmeans);
     
     varargout{1} = C;
 
@@ -125,8 +125,6 @@ function [idx, varargout] = psoKmeans(K, D, varargin)
         end
 
     end
-
-    
 
     function [Z_min, Z_max, X, V, ...
             P_best_fitness, P_best_x, ...
